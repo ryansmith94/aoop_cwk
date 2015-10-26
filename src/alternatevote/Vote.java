@@ -8,7 +8,6 @@ import java.util.ArrayList;
  */
 public class Vote {
     private final ArrayList<Candidate> preferences;
-    private Integer choice = 0;
     
     public Vote(ArrayList<Candidate> candidates) {
         this.preferences = candidates;
@@ -23,53 +22,29 @@ public class Vote {
     }
     
     /**
-     * Starts counting using first preferences.
+     * Counts the vote.
      */
-    public void startCount() {
-        assert preferences != null;
-        assert preferences.size() > 0;
-        choice = 0;
-        preferences.get(choice).incrementCount();
-    }
-    
-    /**
-     * Redistributes vote if a new preference is found.
-     */
-    public void redistribute() {
-        assert preferences != null;
-        assert preferences.size() > 0;
-        assert choice >= 0;
-        Candidate newChoice = null;
-        
-        // Finds a new choice if required.
-        while (hasNewChoice()) {
-            newChoice = preferences.get(++choice);
+    public void count() {
+        Candidate candidate = getChoice();
+        if (candidate != null) {
+            candidate.incrementCount();
         }
-        
-        // Redistributes the count if a new choice is found.
-        if (newChoice != null) {
-            newChoice.incrementCount();
-        }
-    }
-
-    /**
-     * Determines if there is a new choice.
-     * @return True if there is a new choice.
-     */
-    private boolean hasNewChoice() {
-        assert preferences != null;
-        assert choice >= 0;
-        assert choice < preferences.size();
-        boolean isEliminated = preferences.get(choice).isEliminated();
-        boolean hasNextPreference = choice + 1 < preferences.size();
-        return isEliminated && hasNextPreference;
     }
 
     /**
      * Gets the current choice.
      * @return The current choice.
      */
-    public int getChoice() {
-        return choice;
+    public Candidate getChoice() {
+        assert preferences != null;
+        Candidate candidate = null;
+        
+        for (int choice = preferences.size() - 1; choice >= 0; choice--) {
+            if (!preferences.get(choice).isEliminated()) {
+                candidate = preferences.get(choice);
+            }
+        }
+        
+        return candidate;
     }
 }

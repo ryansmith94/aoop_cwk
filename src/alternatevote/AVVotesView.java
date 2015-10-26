@@ -61,7 +61,7 @@ public class AVVotesView implements Observer {
         for (Vote vote : votes) {
             int preference = 1;
             for (Candidate candidate : vote.getPreferences()) {
-                boolean isPreference = !candidate.isEliminated() && vote.getChoice() == preference - 1;
+                boolean isPreference = vote.getChoice() == candidate;
                 
                 // Displays the current preference/choice in green.
                 if (isPreference) {

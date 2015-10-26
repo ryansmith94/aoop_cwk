@@ -12,43 +12,42 @@ import java.util.Scanner;
  * @author ryansmith
  */
 public class AVModel extends Observable {
-    private final ArrayList<Vote> votes;
-    private final ArrayList<Candidate> candidates;
-    private int round = 0;
+    private final ArrayList<Vote> votes = new ArrayList<>();
+    private final ArrayList<Candidate> candidates = new ArrayList<>();
     
     public AVModel() {
-        this.candidates = new ArrayList<>();
-        this.votes = new ArrayList<>();
         addCandidate("Cameron");
         addCandidate("Corbyn");
         addCandidate("Farron");
         addCandidate("Sturgeon");
     }
-
+    
     /**
-     * Starts counting votes from first preferences.
+     * Counts votes for candidates.
+     */
+    public void countVotes() {
+        assert candidates != null;
+        assert votes != null;
+        candidates.forEach((candidate) -> candidate.resetCount());
+        votes.forEach((vote) -> vote.count());
+        emitChange();
+    }
+    
+    /**
+     * Starts counting using first preferences.
      */
     public void startCounting() {
         assert candidates != null;
-        assert votes != null;
-        assert round == 0;
-        candidates.forEach((candidate) -> candidate.reset());
-        votes.forEach((vote) -> vote.startCount());
-        updateRound();
-        emitChange();
+        candidates.forEach((candidate) -> candidate.resetElimination());
+        this.countVotes();
     }
-
+    
     /**
-     * Redistributes votes.
+     * Redistributes votes from eliminated candidates.
      */
     public void redistribute() {
-        assert candidates != null;
-        assert votes != null;
-        assert round > 0;
         updateCandidates();
-        votes.forEach((vote) -> vote.redistribute());
-        updateRound();
-        emitChange();
+        this.countVotes();
     }
 
     /**
@@ -122,22 +121,13 @@ public class AVModel extends Observable {
     public ArrayList<Candidate> getCandidates() {
         return candidates;
     }
-
-    /**
-     * Gets the current round.
-     * @return the round.
-     */
-    public int getRound() {
-        return round;
-    }
     
     /**
-     * Updates the round based on the vote counts of the candidates and the current round.
+     * Determines if counting has started.
+     * @return True if counting has started.
      */
-    private void updateRound() {
+    public boolean hasStarted() {
         assert candidates != null;
-        assert round >= 0;
-        assert round < candidates.size();
         int highestCount = 0;
         int totalCount = 0;
         
@@ -153,11 +143,7 @@ public class AVModel extends Observable {
         }
         
         // Determines if the round should be reset or incremented.
-        if (totalCount < 1 || highestCount * 2 > totalCount || round == candidates.size() - 1) {
-            round = 0;
-        } else {
-            round += 1;
-        }
+        return !(totalCount < 1 || highestCount * 2 > totalCount);
     }
     
     /**

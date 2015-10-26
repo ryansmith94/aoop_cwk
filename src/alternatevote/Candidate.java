@@ -11,14 +11,14 @@ public class Candidate {
     
     public Candidate(String name) {
         this.name = name;
-        reset();
+        resetCount();
+        resetElimination();
     }
     
     /**
      * Resets the candidate.
      */
-    public void reset() {
-        count = 0;
+    public void resetElimination() {
         eliminated = false;
     }
 
@@ -44,6 +44,13 @@ public class Candidate {
     public void incrementCount() {
         count += 1;
     }
+    
+    /**
+     * Resets the count.
+     */
+    public void resetCount() {
+        count = 0;
+    }
 
     /**
      * Eliminates the candidate.
@@ -51,7 +58,6 @@ public class Candidate {
     public void eliminate() {
         assert eliminated == false;
         eliminated = true;
-        count = 0;
     }
     
     /**

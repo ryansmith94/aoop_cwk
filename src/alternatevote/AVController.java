@@ -18,11 +18,11 @@ public class AVController {
     }
     
     /**
-     * Starts counting votes from first preferences.
+     * Starts counting votes.
      */
     public void startCounting() {
         model.startCounting();
-        checkRound();
+        checkStart();
     }
     
     /**
@@ -30,7 +30,7 @@ public class AVController {
      */
     public void redistribute() {
         model.redistribute();
-        checkRound();
+        checkStart();
     }
     
     /**
@@ -99,13 +99,13 @@ public class AVController {
     }
     
     /**
-     * Checks the round to update the countingView.
+     * Checks the start to update the countingView.
      */
-    private void checkRound() {
-        if (model.getRound() == 0) {
-            countingView.enableStart();
-        } else {
+    private void checkStart() {
+        if (model.hasStarted()) {
             countingView.disableStart();
+        } else {
+            countingView.enableStart();
         }
     }
 }
