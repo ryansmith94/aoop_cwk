@@ -1,7 +1,7 @@
 package alternatevote;
 
 /**
- *
+ * A class for representing and manipulating a candidate.
  * @author ryansmith
  */
 public class Candidate {
@@ -17,6 +17,7 @@ public class Candidate {
     
     /**
      * Resets the candidate.
+     * @post Candidate is not eliminated.
      */
     public void resetElimination() {
         eliminated = false;
@@ -40,6 +41,7 @@ public class Candidate {
     
     /**
      * Increments the count.
+     * @post Vote count for the candidate has been incremented by 1.
      */
     public void incrementCount() {
         count += 1;
@@ -47,6 +49,7 @@ public class Candidate {
     
     /**
      * Resets the count.
+     * @post Vote count is 0.
      */
     public void resetCount() {
         count = 0;
@@ -54,6 +57,8 @@ public class Candidate {
 
     /**
      * Eliminates the candidate.
+     * @pre Candidate is not eliminated.
+     * @post Candidate is eliminated.
      */
     public void eliminate() {
         assert eliminated == false;

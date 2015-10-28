@@ -3,7 +3,7 @@ package alternatevote;
 import java.util.ArrayList;
 
 /**
- *
+ * A class for representing and manipulating a vote.
  * @author ryansmith
  */
 public class Vote {
@@ -22,7 +22,8 @@ public class Vote {
     }
     
     /**
-     * Counts the vote.
+     * Increments the count for the preferred candidate.
+     * @post The highest available preference's vote count has been incremented.
      */
     public void count() {
         Candidate candidate = getChoice();
@@ -34,6 +35,7 @@ public class Vote {
     /**
      * Gets the current choice.
      * @return The current choice.
+     * @pre preferences is not null.
      */
     public Candidate getChoice() {
         assert preferences != null;

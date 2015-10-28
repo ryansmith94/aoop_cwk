@@ -8,7 +8,7 @@ import java.util.Random;
 import java.util.Scanner;
 
 /**
- *
+ * A model for alternate voting.
  * @author ryansmith
  */
 public class AVModel extends Observable {
@@ -23,31 +23,27 @@ public class AVModel extends Observable {
     }
     
     /**
-     * Counts votes for candidates.
-     */
-    public void countVotes() {
-        assert candidates != null;
-        assert votes != null;
-        candidates.forEach((candidate) -> candidate.resetCount());
-        votes.forEach((vote) -> vote.count());
-        emitChange();
-    }
-    
-    /**
      * Starts counting using first preferences.
+     * @pre Counting has not started.
+     * @pre candidates is not null.
+     * @post Votes have been counted for first preferences.
      */
     public void startCounting() {
+        assert hasStarted() == false;
         assert candidates != null;
         candidates.forEach((candidate) -> candidate.resetElimination());
-        this.countVotes();
+        countVotes();
     }
     
     /**
      * Redistributes votes from eliminated candidates.
+     * @pre Counting has started.
+     * @post Votes have been counted for highest available preferences.
      */
     public void redistribute() {
+        assert hasStarted() == true;
         updateCandidates();
-        this.countVotes();
+        countVotes();
     }
 
     /**
@@ -55,6 +51,7 @@ public class AVModel extends Observable {
      * @param absolutePath The absolute path the file to load votes from.
      * @throws FileNotFoundException
      * @throws Exception 
+     * @post Votes in the CSV file have been added to the existing votes.
      */
     public void loadVotes(String absolutePath) throws FileNotFoundException, Exception {
         try (Scanner scanner = new Scanner(new File(absolutePath))) {
@@ -76,11 +73,16 @@ public class AVModel extends Observable {
     /**
      * Adds a vote.
      * @param preferenceIds The candidate IDs of the preferences.
-     * @throws Exception 
+     * @throws Exception
+     * @pre votes is not null.
+     * @pre candidates is not null.
+     * @pre preferenceIds is not null.
+     * @post The new vote is added to the votes.
      */
     public void addVote(ArrayList<Integer> preferenceIds) throws Exception {
         assert votes != null;
         assert candidates != null;
+        assert preferenceIds != null;
         ArrayList<Candidate> preferences = new ArrayList<>();
         
         // Validates the number of preferences.
@@ -125,6 +127,7 @@ public class AVModel extends Observable {
     /**
      * Determines if counting has started.
      * @return True if counting has started.
+     * @pre candidates is not null.
      */
     public boolean hasStarted() {
         assert candidates != null;
@@ -147,12 +150,28 @@ public class AVModel extends Observable {
     }
     
     /**
+     * Counts votes for candidates.
+     * @pre candidates is not null.
+     * @pre votes is not null.
+     */
+    private void countVotes() {
+        assert candidates != null;
+        assert votes != null;
+        candidates.forEach((candidate) -> candidate.resetCount());
+        votes.forEach((vote) -> vote.count());
+        emitChange();
+    }
+    
+    /**
      * Updates the candidates preparing them for the next round of counting.
+     * @pre candidates is not null.
+     * @pre votes is not null.
+     * @post One of the lowest scorers is eliminated (if there were any low scorers).
      */
     private void updateCandidates() {
         assert candidates != null;
-        assert candidates.size() > 0;
-        int lowestCount = candidates.get(0).getCount();
+        assert votes != null;
+        int lowestCount = votes.size();
         ArrayList<Candidate> lowScorers = new ArrayList<>();
         
         // Finds the lowest scorers.
@@ -177,6 +196,7 @@ public class AVModel extends Observable {
     
     /**
      * Emits a change to the subscribed observers.
+     * @post Observers are updated.
      */
     private void emitChange() {
         setChanged();
@@ -186,8 +206,12 @@ public class AVModel extends Observable {
     /**
      * Adds a candidate to the ballot.
      * @param name The name of the candidate.
+     * @pre candidates is not null.
+     * @post The new candidate is added to candidates.
      */
     private void addCandidate(String name) {
+        assert candidates != null;
         candidates.add(new Candidate(name));
+        assert candidates.get(candidates.size() - 1).getName().equals(name);
     }
 }
