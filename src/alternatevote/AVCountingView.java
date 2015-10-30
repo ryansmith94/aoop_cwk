@@ -51,6 +51,8 @@ public class AVCountingView implements Observer {
         
         // Sorts candidates.
         candidates.sort((candidate1, candidate2) -> {
+            if (candidate1.isEliminated()) return 1;
+            if (candidate2.isEliminated()) return -1;
             return Integer.compare(candidate2.getCount(), candidate1.getCount());
         });
         
