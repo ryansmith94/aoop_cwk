@@ -145,6 +145,9 @@ public class AVVotesView implements Observer {
      * Creates all of the controls for the view (buttons, panels, etc).
      */
     private void createControls() {
+        // Enables/disables buttons.
+        enableAdding();
+        
         // Hooks up the controller on the action listeners.
         loadButton.addActionListener((e) -> controller.loadVotes());
         addButton.addActionListener((e) -> {
@@ -196,5 +199,21 @@ public class AVVotesView implements Observer {
      */
     public void showError(String message) {
         showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    /**
+     * Disables adding.
+     */
+    public void disableAdding() {
+        loadButton.setEnabled(false);
+        addButton.setEnabled(false);
+    }
+    
+    /**
+     * Enables adding.
+     */
+    public void enableAdding() {
+        loadButton.setEnabled(true);
+        addButton.setEnabled(true);
     }
 }

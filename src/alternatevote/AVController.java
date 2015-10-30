@@ -104,8 +104,10 @@ public class AVController {
     private void checkStart() {
         if (model.hasStarted()) {
             countingView.disableStart();
+            votesView.disableAdding();
         } else {
             countingView.enableStart();
+            votesView.enableAdding();
         }
     }
 }
