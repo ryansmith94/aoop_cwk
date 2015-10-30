@@ -15,6 +15,8 @@ import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.showMessageDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * A view for listing votes and adding more.
@@ -27,8 +29,8 @@ public class AVVotesView implements Observer {
     // Defines components to be used throughout the view.
     private final JButton addButton = new JButton("Add vote");
     private final JButton loadButton = new JButton("Load votes");
-    private final JLabel votesLabel = new JLabel("");
     private final JPanel panel = new JPanel();
+    private final JTable votesTable = new JTable();
     private final ArrayList<JComboBox<String>> comboBoxes = new ArrayList<>();
     private static final Dimension PANEL_SIZE = new Dimension(500, 500);
     
@@ -50,36 +52,33 @@ public class AVVotesView implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         ArrayList<Vote> votes = model.getVotes();
-        String text = "<html><div style='text-align: center; width: " + PANEL_SIZE.width + ";'><h3>Votes</h3>";
+        ArrayList<Candidate> candidates = model.getCandidates();
+        Object[][] rowData = new Object[votes.size()][candidates.size()];
+        Object[] columnNames = new Object[candidates.size()];
         
-        // Displays helpful message when there aren't any votes.
-        if (votes.isEmpty()) {
-            text += "There are no votes right now.";
+        // Adds columns to votes table.
+        for (int index = 0; index < candidates.size(); index++) {
+            columnNames[index] = "Preference " + (index + 1);
         }
         
         // Displays the preferences for all votes.
-        for (Vote vote : votes) {
-            int preference = 1;
-            for (Candidate candidate : vote.getPreferences()) {
-                boolean isPreference = vote.getChoice() == candidate;
+        for (int index = 0; index < votes.size(); index++) {
+            ArrayList<Candidate> preferences = votes.get(index).getPreferences();
+            for (int preference = 0; preference < preferences.size(); preference++) {
+                String prefText = "<html><span ";
                 
                 // Displays the current preference/choice in green.
-                if (isPreference) {
-                    text += "<span style='color:green'>";
+                if (preferences.get(preference) == votes.get(index).getChoice()) {
+                    prefText += "style='color:green'";
                 }
                 
-                text += (preference++) + " - " + candidate.getName() + ". ";
-                
-                if (isPreference) {
-                    text += "</span>";
-                }
+                prefText += ">"+preferences.get(preference).getName()+"</span></html>";
+                rowData[index][preference] = prefText;
             }
-            text += "<br>";
         }
         
-        // Updates the votes label.
-        text += "</div><br></html>";
-        votesLabel.setText(text);
+        // Updates the model for the votes table.
+        votesTable.setModel(new DefaultTableModel(rowData, columnNames));
     }
     
     /**
@@ -160,18 +159,18 @@ public class AVVotesView implements Observer {
         });
         
         // Defines components not needed as instance attributes.
-        JPanel votesPanel = new JPanel(new BorderLayout());
-        JScrollPane votesScroller = new JScrollPane(votesPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JScrollPane votesScroller = new JScrollPane(votesTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         JPanel bottomPanel = new JPanel();
         JPanel buttonsPanel = new JPanel();
+        JLabel votesLabel = new JLabel("<html><div style='text-align: center; width: " + PANEL_SIZE.width + ";'><h3>Votes</h3></html>");
         votesScroller.setBorder(BorderFactory.createEmptyBorder());
+        votesTable.setEnabled(false);
         
         // Lays out the components.
         panel.setLayout(new BorderLayout());
+        panel.add(votesLabel, BorderLayout.PAGE_START);
         panel.add(votesScroller, BorderLayout.CENTER);
         panel.add(bottomPanel, BorderLayout.PAGE_END);
-        
-        votesPanel.add(votesLabel, BorderLayout.PAGE_START);
         
         bottomPanel.setLayout(new BorderLayout());
         bottomPanel.add(createComboBoxes(), BorderLayout.PAGE_START);
