@@ -6,7 +6,6 @@ import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -57,10 +56,8 @@ public class AVCountingView implements Observer {
         
         // Adds rows to candidates table.
         for (int index = 0; index < candidates.size(); index++) {
-            rowData[index][0] = candidates.get(index).getName();
-            if (candidates.get(index).isEliminated()) {
-                rowData[index][1] = "0 - ELIMINATED";
-            } else {
+            if (!candidates.get(index).isEliminated()) {
+                rowData[index][0] = candidates.get(index).getName();
                 rowData[index][1] = candidates.get(index).getCount();
             }
         }

@@ -54,6 +54,7 @@ public class AVModel extends Observable {
      * @post Votes in the CSV file have been added to the existing votes.
      */
     public void loadVotes(String absolutePath) throws FileNotFoundException, Exception {
+        assert hasStarted() == false;
         try (Scanner scanner = new Scanner(new File(absolutePath))) {
             scanner.useDelimiter("\n"); // Each vote is separated by a new line.
             while (scanner.hasNext()) {
@@ -80,6 +81,7 @@ public class AVModel extends Observable {
      * @post The new vote is added to the votes.
      */
     public void addVote(ArrayList<Integer> preferenceIds) throws Exception {
+        assert hasStarted() == false;
         assert votes != null;
         assert candidates != null;
         assert preferenceIds != null;
