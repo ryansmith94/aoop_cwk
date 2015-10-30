@@ -67,9 +67,9 @@ public class AVVotesView implements Observer {
             for (int preference = 0; preference < preferences.size(); preference++) {
                 String prefText = "<html><span ";
                 
-                // Displays the current preference/choice in green.
+                // Displays the current preference/choice in a different colour.
                 if (preferences.get(preference) == votes.get(index).getChoice()) {
-                    prefText += "style='color:green'";
+                    prefText += "style='color:red'";
                 }
                 
                 prefText += ">"+preferences.get(preference).getName()+"</span></html>";
@@ -78,7 +78,12 @@ public class AVVotesView implements Observer {
         }
         
         // Updates the model for the votes table.
-        votesTable.setModel(new DefaultTableModel(rowData, columnNames));
+        votesTable.setModel(new DefaultTableModel(rowData, columnNames) {
+            @Override
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return false; // Stops cells being edited.
+            }
+        });
     }
     
     /**
@@ -144,6 +149,11 @@ public class AVVotesView implements Observer {
      * Creates all of the controls for the view (buttons, panels, etc).
      */
     private void createControls() {
+        JScrollPane votesScroller = new JScrollPane(votesTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        JPanel bottomPanel = new JPanel();
+        JPanel buttonsPanel = new JPanel();
+        JLabel votesLabel = new JLabel("<html><div style='text-align: center; width: " + PANEL_SIZE.width + ";'><h3>Votes</h3></html>");
+        
         // Enables/disables buttons.
         enableAdding();
         
@@ -157,14 +167,6 @@ public class AVVotesView implements Observer {
             // Requests that the controller adds a vote with the given candidate IDs.
             controller.addVote(candidateIds);
         });
-        
-        // Defines components not needed as instance attributes.
-        JScrollPane votesScroller = new JScrollPane(votesTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        JPanel bottomPanel = new JPanel();
-        JPanel buttonsPanel = new JPanel();
-        JLabel votesLabel = new JLabel("<html><div style='text-align: center; width: " + PANEL_SIZE.width + ";'><h3>Votes</h3></html>");
-        votesScroller.setBorder(BorderFactory.createEmptyBorder());
-        votesTable.setEnabled(false);
         
         // Lays out the components.
         panel.setLayout(new BorderLayout());

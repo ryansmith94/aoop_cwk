@@ -6,9 +6,13 @@ import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * A view for listing and calculating the vote counts of candidates.
@@ -21,7 +25,7 @@ public class AVCountingView implements Observer {
     // Defines components to be used throughout the view.
     private final JButton startButton = new JButton("Start counting");
     private final JButton redistributeButton = new JButton("Redistribute");
-    private final JLabel candidatesLabel = new JLabel("");
+    private final JTable candidatesTable = new JTable();
     private final JPanel panel = new JPanel();
     private static final Dimension PANEL_SIZE = new Dimension(500, 500);
     
@@ -42,30 +46,42 @@ public class AVCountingView implements Observer {
      */
     @Override
     public void update(Observable o, Object arg) {
-        ArrayList<Candidate> candidates = model.getCandidates();
-        String counts = "<html><div style='text-align: center; width: " + PANEL_SIZE.width + ";'><h3>Counts</h3>";
+        ArrayList<Candidate> candidates = new ArrayList<>(model.getCandidates());
+        String[] columnNames = {"Name", "Count"};
+        Object[][] rowData = new Object[candidates.size()][2];
         
-        // Displays helpful message when there aren't any candidates.
-        if (candidates.isEmpty()) {
-            counts += "There are no candidates right now.";
-        }
+        // Sorts candidates.
+        candidates.sort((candidate1, candidate2) -> {
+            return Integer.compare(candidate2.getCount(), candidate1.getCount());
+        });
         
-        // Displays all candidates except those that have been eliminated.
-        for (Candidate candidate : candidates) {
-            if (!candidate.isEliminated()) {
-                counts += candidate.getName() + " - " + candidate.getCount() + "<br>";
+        // Adds rows to candidates table.
+        for (int index = 0; index < candidates.size(); index++) {
+            rowData[index][0] = candidates.get(index).getName();
+            if (candidates.get(index).isEliminated()) {
+                rowData[index][1] = "0 - ELIMINATED";
+            } else {
+                rowData[index][1] = candidates.get(index).getCount();
             }
         }
         
-        // Updates the candidates label.
-        counts += "</div></html>";
-        candidatesLabel.setText(counts);
+        // Updates the model for the candidates table.
+        candidatesTable.setModel(new DefaultTableModel(rowData, columnNames) {
+            @Override
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return false; // Stops cells being edited.
+            }
+        });
     }
 
     /**
      * Creates all of the controls for the view (buttons, panels, etc).
      */
     private void createControls() {
+        JPanel buttonsPanel = new JPanel();
+        JLabel candidatesLabel = new JLabel("<html><div style='text-align: center; width: " + PANEL_SIZE.width + ";'><h3>Counts</h3></html>");
+        JScrollPane candidatesScroller = new JScrollPane(candidatesTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        
         // Enables/disables buttons.
         enableStart();
         
@@ -73,12 +89,10 @@ public class AVCountingView implements Observer {
         startButton.addActionListener((e) -> controller.startCounting());
         redistributeButton.addActionListener((e) -> controller.redistribute());
         
-        // Defines components not needed as instance attributes.
-        JPanel buttonsPanel = new JPanel();
-        
         // Lays out the components.
         panel.setLayout(new BorderLayout());
         panel.add(candidatesLabel, BorderLayout.PAGE_START);
+        panel.add(candidatesScroller, BorderLayout.CENTER);
         panel.add(buttonsPanel, BorderLayout.PAGE_END);
         
         buttonsPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
